@@ -10,6 +10,6 @@
 } */
 body 
 {
-  background-color: black;
+  background-color: linear-gradient(to top, #7e7d7d, #fff);
   overflow: hidden;
 } 
