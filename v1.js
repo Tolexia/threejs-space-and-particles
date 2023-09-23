@@ -85,7 +85,12 @@ const renderer = new WebGLRenderer({
 const controls = new OrbitControls(camera, renderer.domElement)
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-
+let mouseX = 0;
+let mouseY = 0;
+window.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+})
 function animate()
 {
     renderer.render(scene, camera);
