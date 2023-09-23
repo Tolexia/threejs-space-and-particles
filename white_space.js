@@ -3,6 +3,7 @@ import {
      AxesHelper,
       BufferGeometry,
       Clock,
+      DirectionalLight,
       Float32BufferAttribute,
       GridHelper,
       Group,
@@ -11,6 +12,7 @@ import {
       MathUtils,
       Mesh,
       MeshNormalMaterial,
+      MeshPhongMaterial,
       PerspectiveCamera,
      PointLight,
      PointLightHelper,
@@ -23,6 +25,8 @@ import {
     //  VertexColors
 } from 'three'
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import './style_vA.css'
 
 const textureLoader = new TextureLoader()
@@ -32,10 +36,21 @@ const scene = new Scene;
 // scene.add(new AxesHelper());
 
 const camera = new PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 1000);
-camera.position.z = 5
+camera.position.z = 75
 camera.position.x = 1
 camera.position.y = 1
 scene.add(camera)
+
+// LIGHTS
+
+const dirLight = new DirectionalLight( 0xffffff, 0.4 );
+dirLight.position.set( 0, 0, 1 ).normalize();
+scene.add( dirLight );
+
+const pointLight = new PointLight(0xffffff, 4.5, 0, 0 );
+pointLight.color.setHSL( Math.random(), 1, 0.5 );
+pointLight.position.set( 0, 100, 90 );
+scene.add( pointLight );
 
 const count = 10000
 const distance = 200;
@@ -69,6 +84,32 @@ const pointObject = new Points(pointGeometry, pointMaterial);
 const group = new Group();
 group.add(pointObject);
 
+var font
+const fontLoader = new FontLoader();
+fontLoader.load( '/helvetiker_regular.typeface.json', function ( response ) {
+    font = response;
+    // const helvetikerRegular = new FontLoader().parse(helvetiker)
+    const textGeometry = new TextGeometry( 'A World of Geometry', {
+        font: font,
+        size: 10,
+        height: 2,
+        curveSegments: 12,
+        bevelEnabled: false,
+        bevelThickness: 0.1,
+        bevelSize: 0.1 ,
+        // bevelOffset: 0,
+        // bevelSegments: 5
+    } );
+    textGeometry.center()
+    // textGeometry.computeBoundingBox();
+    const textMaterials = [
+        new MeshPhongMaterial( { color: 0x000000, flatShading: true } ), // front
+        new MeshPhongMaterial( { color: 0x000000 } ) // side
+    ];
+    const textMesh = new Mesh( textGeometry, textMaterials );
+    group.add(textMesh)
+} );
+
 // Lines
 const lineGeometry = new BufferGeometry();
 lineGeometry.setAttribute('position', new Float32BufferAttribute(lines, 3))
@@ -101,12 +142,14 @@ window.addEventListener('mousemove', e => {
 function animate()
 {
     const time = clock.getElapsedTime();
-    const ratio1 = (mouseX / window.innerWidth-0.5) * 2;
-    const ratio2 = (mouseY / window.innerHeight-0.5) * 2;
-    group.rotation.y = ratio1 * Math.PI * 0.1
-    group.rotation.x = ratio2 * Math.PI * 0.1
-    group.rotation.x += time * 0.03
-    group.rotation.y += time * 0.03
+    // const ratio1 = (mouseX / window.innerWidth-0.5) * 2;
+    // const ratio2 = (mouseY / window.innerHeight-0.5) * 2;
+    // group.rotation.y = ratio1 * Math.PI * 0.1
+    // group.rotation.x = ratio2 * Math.PI * 0.1
+    // group.rotation.x += time * 0.03
+    // group.rotation.y += time * 0.03
+    group.rotation.x -=  0.0005
+    group.rotation.y -=  0.0005
     renderer.render(scene, camera);
     controls.update()
     camera.lookAt(0,0,0);
