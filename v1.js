@@ -18,40 +18,61 @@ function addStar() {
   
     const [x, y, z] = Array(3)
       .fill()
-      .map(() => THREE.MathUtils.randFloatSpread(100));
+      .map(() => THREE.MathUtils.randFloatSpread(400));
   
     star.position.set(x, y, z);
     scene.add(star);
 }
 
-Array(200).fill().forEach(addStar);
+Array(10000).fill().forEach(addStar);
 // Background
 
-const spaceTexture = new THREE.TextureLoader().load('space.jpg');
-scene.background = spaceTexture;
+// const spaceTexture = new THREE.TextureLoader().load('stars.jpg');
+// scene.background = spaceTexture;
 
-const moonTexture = new THREE.TextureLoader().load('moon.jpg');
+const earthTexture = new THREE.TextureLoader().load('earth.jpg');
 const normalTexture = new THREE.TextureLoader().load('normal.jpg');
-
-const moon = new THREE.Mesh(
+const cloudTexture = new THREE.TextureLoader().load('earth_clouds.jpg');
+//Earth
+// MAKE IT A GROUP TO ADD CLOUDS !!!!!
+const earth = new THREE.Mesh(
   new THREE.SphereGeometry(3, 32, 32),
   new THREE.MeshStandardMaterial({
-    map: moonTexture,
+    map: earthTexture,
     normalMap: normalTexture,
   })
 );
+// Earth Clouds
+const cloudSegments = 200;
+const cloudGeometry = new THREE.SphereGeometry(
+  2.03,
+  cloudSegments,
+  cloudSegments
+);
+const cloudMaterial = new THREE.MeshPhongMaterial({
+  precision: 'highp',
+  map: cloudTexture,
+  side: THREE.DoubleSide,
+  opacity: 0.8,
+  transparent: true,
+  depthWrite: false,
+  blending: THREE.CustomBlending,
+  blendEquation: THREE.MaxEquation,
+});
+const cloudMesh = new THREE.Mesh(cloudGeometry, cloudMaterial);
+earth.add(cloudMesh);
+scene.add(earth);
 
-scene.add(moon);
+earth.position.z = 0;
+// earth.position.setX(-10);
 
-moon.position.z = 0;
-// moon.position.setX(-10);
+//Lights
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+scene.add(ambientLight);
 
-
-const pointLight = new THREE.PointLight(0xffffff);
-pointLight.position.set(5, 5, 5);
-
-const ambientLight = new THREE.AmbientLight(0xffffff);
-scene.add(pointLight, ambientLight);
+const directionalLight = new THREE.DirectionalLight(0x99ffff, 1.3);
+directionalLight.position.set(800, 0.0, 0);
+scene.add(directionalLight);
 
 // const lightHelper = new PointLightHelper(pointLight);
 // const gridHelper = new GridHelper(200,50);
@@ -68,9 +89,9 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
 function animate()
 {
     renderer.render(scene, camera);
-    moon.rotation.x += 0.0005;
-    moon.rotation.y += 0.00075;
-    moon.rotation.z += 0.0005;
+    earth.rotation.x += 0.0005;
+    earth.rotation.y += 0.00075;
+    earth.rotation.z += 0.0005;
     controls.update()
     camera.lookAt(0,0,0);
     requestAnimationFrame(animate)
