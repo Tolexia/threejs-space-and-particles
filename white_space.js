@@ -83,6 +83,20 @@ const pointMaterial = new PointsMaterial({
 const pointObject = new Points(pointGeometry, pointMaterial);
 const group = new Group();
 group.add(pointObject);
+// function addStar() {
+//     const geometry = new THREE.SphereGeometry(0.25, 24, 24);
+//     const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
+//     const star = new THREE.Mesh(geometry, material);
+  
+//     const [x, y, z] = Array(3)
+//       .fill()
+//       .map(() => THREE.MathUtils.randFloatSpread(400));
+  
+//     star.position.set(x, y, z);
+//     scene.add(star);
+// }
+
+// Array(10000).fill().forEach(addStar);
 
 var font
 const fontLoader = new FontLoader();
@@ -91,7 +105,7 @@ fontLoader.load( '/helvetiker_regular.typeface.json', function ( response ) {
     // const helvetikerRegular = new FontLoader().parse(helvetiker)
     const textGeometry = new TextGeometry( 'A World of Geometry', {
         font: font,
-        size: 10,
+        size: Math.max(window.innerWidth,window.innerHeight) / Math.max(window.innerWidth,window.innerHeight) * 4,
         height: 2,
         curveSegments: 12,
         bevelEnabled: false,
@@ -135,23 +149,40 @@ document.body.appendChild(renderer.domElement)
 const clock = new Clock();
 let mouseX = 0;
 let mouseY = 0;
+window.isClicking = false
+window.addEventListener('mousedown', e => window.isClicking = true)
+window.addEventListener('touchstart', e => window.isClicking = true)
+window.addEventListener('mouseup', e => window.isClicking = false)
+window.addEventListener('touchend', e => window.isClicking = false)
+window.isClickAble = false;
 window.addEventListener('mousemove', e => {
-  mouseX = e.clientX;
-  mouseY = e.clientY;
+    window.isClickAble = true;
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+})
+window.addEventListener('touchmove', e => {
+    if( window.isClickAble == false)
+    {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    }
 })
 function animate()
 {
     const time = clock.getElapsedTime();
-    // const ratio1 = (mouseX / window.innerWidth-0.5) * 2;
-    // const ratio2 = (mouseY / window.innerHeight-0.5) * 2;
-    // group.rotation.y = ratio1 * Math.PI * 0.1
-    // group.rotation.x = ratio2 * Math.PI * 0.1
+    if(window.isClicking == true)
+    {
+        const ratio1 = (mouseX / window.innerWidth-0.5) * 5;
+        const ratio2 = (mouseY / window.innerHeight-0.5) * 5;
+        group.rotation.y = ratio1 - time * 0.1
+        group.rotation.x = ratio2 - time * 0.1
+    }
     // group.rotation.x += time * 0.03
     // group.rotation.y += time * 0.03
     group.rotation.x -=  0.0005
     group.rotation.y -=  0.0005
     renderer.render(scene, camera);
-    controls.update()
+    // controls.update()
     camera.lookAt(0,0,0);
     requestAnimationFrame(animate)
 }

@@ -1,4 +1,4 @@
-import { AmbientLight, AxesHelper,  GridHelper,  Mesh,  MeshStandardMaterial,  PerspectiveCamera, PointLight, PointLightHelper, Scene, SphereGeometry, WebGLRenderer } from 'three'
+import { AmbientLight, AxesHelper,  TextureLoader, Points, MathUtils, PointsMaterial, Float32BufferAttribute , BufferGeometry, GridHelper,  Mesh,  MeshStandardMaterial,  PerspectiveCamera, PointLight, PointLightHelper, Scene, SphereGeometry, WebGLRenderer } from 'three'
 import * as THREE from 'three'; 
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
 import './style.css'
@@ -11,20 +11,30 @@ camera.position.y = 1
 scene.add(camera)
 
 
-function addStar() {
-    const geometry = new THREE.SphereGeometry(0.25, 24, 24);
-    const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
-    const star = new THREE.Mesh(geometry, material);
-  
-    const [x, y, z] = Array(3)
-      .fill()
-      .map(() => THREE.MathUtils.randFloatSpread(400));
-  
-    star.position.set(x, y, z);
-    scene.add(star);
+const count = 10000
+const distance = 200;
+const textureLoader = new TextureLoader()
+const starTexture = textureLoader.load('/star.png')
+// Points
+const points = new Float32Array(count*3); 
+for(let i = 0; i < points.length ; i++)
+{
+    points[i] = MathUtils.randFloatSpread(distance*2)
 }
+const pointGeometry = new BufferGeometry();
+pointGeometry.setAttribute('position', new Float32BufferAttribute(points, 3))
+const pointMaterial = new PointsMaterial({
+    color:0xffffff,
+    // vertexColors:colors,
+    size:1,
+    map: starTexture,
+    alphaTest: 0.01,
+    transparent:true,
+    opacity:.8
+})
+const pointObject = new Points(pointGeometry, pointMaterial);
+scene.add(pointObject);
 
-Array(10000).fill().forEach(addStar);
 // Background
 
 // const spaceTexture = new THREE.TextureLoader().load('stars.jpg');
