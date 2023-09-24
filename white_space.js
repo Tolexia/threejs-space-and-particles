@@ -24,13 +24,11 @@ import {
      WebGLRenderer
     //  VertexColors
 } from 'three'
+import * as THREE from 'three'; 
 import {OrbitControls} from 'three/examples/jsm/controls/OrbitControls'
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import './style_vA.css'
-
-const textureLoader = new TextureLoader()
-const starTexture = textureLoader.load('/star.png')
 
 const scene = new Scene;
 // scene.add(new AxesHelper());
@@ -52,51 +50,41 @@ pointLight.color.setHSL( Math.random(), 1, 0.5 );
 pointLight.position.set( 0, 100, 90 );
 scene.add( pointLight );
 
-const count = 10000
-const distance = 200;
-const countLines = 100;
-// Points
-const points = new Float32Array(count*3); 
-const colors = new Float32Array(count*3); 
-const lines = new Float32Array(countLines*3); 
-for(let i = 0; i < points.length ; i++)
-{
-    points[i] = MathUtils.randFloatSpread(distance*2)
-    colors[i] = Math.random() / 10 + 0.2;
-    if(i < lines.length)
-    {
-        lines[i] = MathUtils.randFloatSpread(distance*2)
-    }
-}
-const pointGeometry = new BufferGeometry();
-pointGeometry.setAttribute('position', new Float32BufferAttribute(points, 3))
-pointGeometry.setAttribute('color', new Float32BufferAttribute(colors, 3))
-const pointMaterial = new PointsMaterial({
-    // color:0x000000,
-    vertexColors:colors,
-    size:1,
-    map: starTexture,
-    alphaTest: 0.01,
-    transparent:true,
-    opacity:.8
-})
-const pointObject = new Points(pointGeometry, pointMaterial);
+const distance = 400;
 const group = new Group();
-group.add(pointObject);
-// function addStar() {
-//     const geometry = new THREE.SphereGeometry(0.25, 24, 24);
-//     const material = new THREE.MeshStandardMaterial({ color: 0xffffff });
-//     const star = new THREE.Mesh(geometry, material);
-  
-//     const [x, y, z] = Array(3)
-//       .fill()
-//       .map(() => THREE.MathUtils.randFloatSpread(400));
-  
-//     star.position.set(x, y, z);
-//     scene.add(star);
-// }
+function addBoxes() {
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const [x, y, z] = Array(3)
+    .fill()
+    .map(() => THREE.MathUtils.randFloatSpread(distance));
+    const total = Math.abs(x)+Math.abs(y)-z;
+    const opacity = 1 / total;
+    const material = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe:true, transparent:true, opacity:  Math.abs(opacity)*5  });
+    const star = new THREE.Mesh(geometry, material);
+    star.position.set(x, y, z);
+    group.add(star);
+}
 
-// Array(10000).fill().forEach(addStar);
+Array(2000).fill().forEach(addBoxes);
+function addSpheres() {
+    const geometry = new THREE.SphereGeometry(1, 12, 12);
+    const [x, y, z] = Array(3)
+      .fill()
+      .map(() => THREE.MathUtils.randFloatSpread(distance));
+    const total = Math.abs(x)+Math.abs(y)+Math.abs(z);
+    const opacity = 1 / total;
+    // console.log("x", x);
+    // console.log("y", y);
+    // console.log("z", z);
+    // console.log("total", total);
+    // console.log("opacity", opacity);
+    const material = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe:true, transparent:true, opacity:  Math.abs(opacity)*5 });
+    const star = new THREE.Mesh(geometry, material);
+    star.position.set(x, y, z);
+    group.add(star);
+}
+
+Array(1000).fill().forEach(addSpheres);
 
 var font
 const fontLoader = new FontLoader();
@@ -123,8 +111,13 @@ fontLoader.load( '/helvetiker_regular.typeface.json', function ( response ) {
     const textMesh = new Mesh( textGeometry, textMaterials );
     group.add(textMesh)
 } );
-
 // Lines
+const countLines = 100;
+const lines = new Float32Array(countLines*3); 
+for(let i = 0; i < lines.length ; i++)
+{
+    lines[i] = MathUtils.randFloatSpread(distance)
+}
 const lineGeometry = new BufferGeometry();
 lineGeometry.setAttribute('position', new Float32BufferAttribute(lines, 3))
 const lineMaterial = new LineBasicMaterial({
@@ -135,6 +128,8 @@ const lineMaterial = new LineBasicMaterial({
 })
 const lineObject = new Line(lineGeometry, lineMaterial)
 group.add(lineObject)
+
+
 scene.add(group);
 const renderer = new WebGLRenderer({
     antialias:true,
