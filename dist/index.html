@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script>
+      let url;
+      if(window.location.href.includes("index.html"))
+          url = window.location.href.replace("index.html","dist/index.html");
+      else
+          url = window.location.href+"dist/index.html"
+      const meta = `<meta http-equiv="refresh" content="0; URL=${url}">`;
+      document.head.innerHTML+= meta;
+  </script>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+  </head>
+  <style>
+    canvas
+    {
+      position: absolute;
+      top: 0;
+      left:0;
+      right: 0;
+      bottom: 0;
+    }
+  </style>
+  <body>
+    <canvas id = "renderer"></canvas>
+    <!-- <script type="module" src="/main.js"></script> -->
+    <!-- <script type="module" src="/dark_space.js"></script> -->
+    <!-- <script type="module" src="/white_space.js"></script> -->
+  </body>
+  <script>
+    const script = document.createElement('script')
+    script.type = "module"
+    if(window.location.href.includes("dark_space"))
+    {
+       script.src = "/dark_space.js"
+    }
+    else 
+    {
+      script.src = "/white_space.js"
+    }
+    document.body.appendChild(script)
+  </script>
+</html>
