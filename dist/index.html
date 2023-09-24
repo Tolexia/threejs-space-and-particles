@@ -3,12 +3,12 @@
   <head>
     <script>
       let url;
-      if(window.location.href.includes("index.html"))
-          url = window.location.href.replace("index.html","dist/index.html");
-      else
-          url = window.location.href+"dist/index.html"
-      const meta = `<meta http-equiv="refresh" content="0; URL=${url}">`;
-      document.head.innerHTML+= meta;
+      if(!window.location.href.includes("dist/index.html"))
+      {
+        url = window.location.href+"dist/index.html"
+        const meta = `<meta http-equiv="refresh" content="0; URL=${url}">`;
+        document.head.innerHTML+= meta;
+      }
   </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
