@@ -85,7 +85,7 @@ function addSpheres() {
 }
 
 Array(1000).fill().forEach(addSpheres);
-const baseUrl = (window.location.href.includes("threejs-space-and-particles") ? "/dist" : "/threejs-space-and-particles/dist");
+const baseUrl = (window.location.href.includes("threejs-space-and-particles") ? "/threejs-space-and-particles/dist" : "/dist");
 var font
 const fontLoader = new FontLoader();
 fontLoader.load( `${baseUrl}/helvetiker_regular.typeface.json`, function ( response ) {
