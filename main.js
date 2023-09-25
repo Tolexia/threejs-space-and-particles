@@ -85,10 +85,10 @@ function addSpheres() {
 }
 
 Array(1000).fill().forEach(addSpheres);
-
+const baseUrl = (window.location.href.includes("threejs-space-and-particles") ? "/dist" : "/threejs-space-and-particles/dist");
 var font
 const fontLoader = new FontLoader();
-fontLoader.load( '/dist/helvetiker_regular.typeface.json', function ( response ) {
+fontLoader.load( `${baseUrl}/helvetiker_regular.typeface.json`, function ( response ) {
     font = response;
     // const helvetikerRegular = new FontLoader().parse(helvetiker)
     const textGeometry = new TextGeometry( 'A World of Geometry', {
