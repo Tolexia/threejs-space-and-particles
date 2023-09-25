@@ -88,7 +88,7 @@ Array(1000).fill().forEach(addSpheres);
 
 var font
 const fontLoader = new FontLoader();
-fontLoader.load( './helvetiker_regular.typeface.json', function ( response ) {
+fontLoader.load( '/dist/helvetiker_regular.typeface.json', function ( response ) {
     font = response;
     // const helvetikerRegular = new FontLoader().parse(helvetiker)
     const textGeometry = new TextGeometry( 'A World of Geometry', {
