@@ -128,27 +128,32 @@ const countLines = 100;
 const lines_array = {};
 function addLines(index)
 {
-    const geometry = new THREE.BufferGeometry();
-    const [x, y, z] = Array(3)
-    .fill()
-    .map(() => THREE.MathUtils.randFloatSpread(distance));
-    geometry.setAttribute('position', new Float32BufferAttribute([x,y,z], 3))
+    const points = [];
+    for(let i = 0; i < 2 ; i++)
+    {
+        const [x, y, z] = Array(3)
+        .fill()
+        .map(() => THREE.MathUtils.randFloatSpread(distance));
+        points.push( new THREE.Vector3( x, y, z ) );
+    }
+   
+    const geometry = new THREE.BufferGeometry().setFromPoints( points );
+    // geometry.setAttribute('position', new Float32BufferAttribute(points, 3))
     const material = new LineBasicMaterial({
         color: 0x7a7a7a,
-        opacity: .08   ,
+        opacity: .08,
         transparent:true,
         // depthWrite:false
     })
     const line = new Line(geometry, material)
-    line.position.set(x, y, z);
     lines_array[index] = line;
-    group.add(line);
+    scene.add(line);
 }
 for(let i = 0; i < countLines; i++)
 {
     addLines(i);
 }
-
+console.log("lines_array", lines_array);
 
 scene.add(group);
 const renderer = new WebGLRenderer({
