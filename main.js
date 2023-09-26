@@ -139,7 +139,7 @@ function addLines(index)
         transparent:true,
         // depthWrite:false
     })
-    const line = new Line(lineGeometry, material)
+    const line = new Line(geometry, material)
     line.position.set(x, y, z);
     lines_array[index] = line;
     group.add(line);
