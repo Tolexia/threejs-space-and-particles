@@ -52,7 +52,11 @@ scene.add( pointLight );
 
 const distance = 400;
 const group = new Group();
-function addBoxes() {
+
+// BOXES
+const boxes_array = {};
+const countBoxes = 2000;
+function addBoxes(index) {
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const [x, y, z] = Array(3)
     .fill()
@@ -60,31 +64,38 @@ function addBoxes() {
     const total = Math.abs(x)+Math.abs(y)-z;
     const opacity = 1 / total;
     const material = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe:true, transparent:true, opacity:  Math.abs(opacity)*5  });
-    const star = new THREE.Mesh(geometry, material);
-    star.position.set(x, y, z);
-    group.add(star);
+    const box = new THREE.Mesh(geometry, material);
+    box.position.set(x, y, z);
+    boxes_array[index] = box;
+    group.add(box);
+}
+for(let i = 0; i < countBoxes; i++)
+{
+    addBoxes(i);
 }
 
-Array(2000).fill().forEach(addBoxes);
-function addSpheres() {
+// SPHERES
+const sphere_array = {};
+const countSphere = 1000;
+function addSpheres(index) {
     const geometry = new THREE.SphereGeometry(1, 12, 12);
     const [x, y, z] = Array(3)
       .fill()
       .map(() => THREE.MathUtils.randFloatSpread(distance));
     const total = Math.abs(x)+Math.abs(y)+Math.abs(z);
     const opacity = 1 / total;
-    // console.log("x", x);
-    // console.log("y", y);
-    // console.log("z", z);
-    // console.log("total", total);
-    // console.log("opacity", opacity);
     const material = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe:true, transparent:true, opacity:  Math.abs(opacity)*5 });
-    const star = new THREE.Mesh(geometry, material);
-    star.position.set(x, y, z);
-    group.add(star);
+    const sphere = new THREE.Mesh(geometry, material);
+    sphere.position.set(x, y, z);
+    sphere_array[index] = sphere;
+    group.add(sphere);
+}
+for(let i = 0; i < countSphere; i++)
+{
+    addSpheres(i);
 }
 
-Array(1000).fill().forEach(addSpheres);
+// TEXT
 const baseUrl = (window.location.href.includes("threejs-space-and-particles") ? "/threejs-space-and-particles/dist" : "/dist");
 var font
 const fontLoader = new FontLoader();
@@ -111,23 +122,32 @@ fontLoader.load( `${baseUrl}/helvetiker_regular.typeface.json`, function ( respo
     const textMesh = new Mesh( textGeometry, textMaterials );
     group.add(textMesh)
 } );
+
 // Lines
 const countLines = 100;
-const lines = new Float32Array(countLines*3); 
-for(let i = 0; i < lines.length ; i++)
+const lines_array = {};
+function addLines(index)
 {
-    lines[i] = MathUtils.randFloatSpread(distance)
+    const geometry = new THREE.BufferGeometry();
+    const [x, y, z] = Array(3)
+    .fill()
+    .map(() => THREE.MathUtils.randFloatSpread(distance));
+    geometry.setAttribute('position', new Float32BufferAttribute([x,y,z], 3))
+    const material = new LineBasicMaterial({
+        color: 0x7a7a7a,
+        opacity: .08   ,
+        transparent:true,
+        // depthWrite:false
+    })
+    const line = new Line(lineGeometry, material)
+    line.position.set(x, y, z);
+    lines_array[index] = line;
+    group.add(line);
 }
-const lineGeometry = new BufferGeometry();
-lineGeometry.setAttribute('position', new Float32BufferAttribute(lines, 3))
-const lineMaterial = new LineBasicMaterial({
-    color: 0x7a7a7a,
-    opacity: .08   ,
-    transparent:true,
-    // depthWrite:false
-})
-const lineObject = new Line(lineGeometry, lineMaterial)
-group.add(lineObject)
+for(let i = 0; i < countLines; i++)
+{
+    addLines(i);
+}
 
 
 scene.add(group);
