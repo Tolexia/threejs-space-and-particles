@@ -141,7 +141,7 @@ function addLines(index)
     // geometry.setAttribute('position', new Float32BufferAttribute(points, 3))
     const material = new LineBasicMaterial({
         color: 0x7a7a7a,
-        opacity: .08,
+        opacity: 0.08,
         transparent:true,
         // depthWrite:false
     })
@@ -153,7 +153,6 @@ for(let i = 0; i < countLines; i++)
 {
     addLines(i);
 }
-console.log("lines_array", lines_array);
 
 scene.add(group);
 const renderer = new WebGLRenderer({
@@ -187,20 +186,115 @@ window.addEventListener('touchmove', e => {
         mouseY = e.clientY;
     }
 })
+let previousTime =  Math.floor(clock.getElapsedTime());
+function growAndUngrowLines(lineId, growing = true )
+{
+    if(growing == true)
+    {
+        const line = growingLines[lineId];
+        line.opacity = parseFloat( line.opacity) + 0.01
+        if(line.opacity >= 3 )
+        {
+            delete growingLines[lineId];
+            ungrowingLines[lineId] = line;
+        }
+    }
+    else
+    {
+        const line = ungrowingLines[lineId];
+        line.opacity -= 0.01
+        if(line.scale.x < 1)
+        {
+           delete ungrowingLines[lineId]
+        }
+    }
+}
+function growAndUngrowSphere(sphereId, growing = true )
+{
+    if(growing == true)
+    {
+        const sphere = growingSpheres[sphereId];
+        sphere.scale.x += 0.01
+        sphere.scale.y += 0.01
+        sphere.scale.z += 0.01
+        if(sphere.scale.x >= 3 )
+        {
+            delete growingSpheres[sphereId];
+            ungrowingSpheres[sphereId] = sphere;
+        }
+    }
+    else
+    {
+        const sphere = ungrowingSpheres[sphereId];
+        sphere.scale.x -= 0.01
+        sphere.scale.y -= 0.01
+        sphere.scale.z -= 0.01
+        if(sphere.scale.x < 1)
+        {
+           delete ungrowingSpheres[sphereId]
+        }
+    }
+}
+const growingSpheres = {};
+const ungrowingSpheres = {};
+const growingLines = {};
+const ungrowingLines = {};
 function animate()
 {
     const time = clock.getElapsedTime();
     if(window.isClicking == true)
     {
-        const ratio1 = (mouseX / window.innerWidth-0.5) * 5;
-        const ratio2 = (mouseY / window.innerHeight-0.5) * 5;
-        group.rotation.y = ratio1 - time * 0.1
-        group.rotation.x = ratio2 - time * 0.1
+        const ratio1 = (mouseY / window.innerWidth);
+        const ratio2 = (mouseX / window.innerHeight);
+        group.rotation.x = ratio1 * 0.1
+        group.rotation.y = ratio2 * 0.1
     }
-    // group.rotation.x += time * 0.03
-    // group.rotation.y += time * 0.03
-    group.rotation.x -=  0.0005
-    group.rotation.y -=  0.0005
+    else
+    {
+        group.rotation.x -=  0.0005
+        group.rotation.y -=  0.0005
+       
+        // Be executed 1 time per second
+        if(previousTime != Math.floor(time))
+        {
+            // Lines appearing and disappearing
+            const randomIntLine = Math.floor(Math.random()*countLines);
+            const randLine = lines_array[randomIntLine];
+            scene.remove(randLine)
+            addLines(randomIntLine)
+            // if(typeof growingLines[randomIntLine] == "undefined" && typeof ungrowingLines[randomIntLine] == "undefined")
+            // {
+            //     growingLines[randomIntLine] = randLine;
+            // }
+            // for(let lineId in growingLines)
+            // {
+            //     growAndUngrowLines(lineId, true)
+            // }
+            // for(let lineId in ungrowingLines)
+            // {
+            //     growAndUngrowLines(lineId, false)
+            // }
+            previousTime = Math.floor(time)
+        }
+
+        // Growing and Decreasing Spheres
+        const randomIntSphere = Math.floor(Math.random()*countSphere);
+        const randSphere = sphere_array[randomIntSphere];
+        if(typeof growingSpheres[randomIntSphere] == "undefined" && typeof ungrowingSpheres[randomIntSphere] == "undefined")
+        {
+            growingSpheres[randomIntSphere] = randSphere;
+        }
+        for(let sphereId in growingSpheres)
+        {
+            growAndUngrowSphere(sphereId, true)
+        }
+        for(let sphereId in ungrowingSpheres)
+        {
+            growAndUngrowSphere(sphereId, false)
+        }
+    }
+
+    
     renderer.render(scene, camera);
     // controls.update()
     camera.lookAt(0,0,0);
