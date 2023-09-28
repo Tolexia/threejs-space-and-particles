@@ -149,15 +149,13 @@ function addLines(index, opacity = 0.08, position = null)
         geometry = new THREE.BufferGeometry().setAttribute('position', position)
     }
     // geometry.setAttribute('position', new Float32BufferAttribute(points, 3))
-    let color = (index == 5 ? 0x00f00f : 0x7a7a7a )
     const material = new LineBasicMaterial({
-        color: color,
+        color: 0x7a7a7a,
         opacity: opacity.toFixed(2),
         transparent:true,
         // depthWrite:false
     })
     const line = new Line(geometry, material)
-    // console.log("line", line);
     lines_array[index] = line;
     scene.add(line);
     return line;
@@ -235,25 +233,13 @@ function growAndUngrowLines(lineId, growing = true )
             console.log("growingLines[lineId] not found : ", lineId);
             return;
         }
-        const line = growingLines[lineId].object;
-        const position = line.geometry.attributes.position;
-        const newOpacity = parseFloat( growingLines[lineId].opacity) + 0.001
-        if(lineId == 5)
+        const line = growingLines[lineId];
+        const newOpacity =( parseFloat(line.material.opacity) + 0.001).toFixed(3) 
+        line.material.opacity = newOpacity.toString()
+        if(newOpacity >= 0.2 )
         {
-            // console.log("growing");
-            // console.log("newOpacity", newOpacity);
-        }
-        scene.remove(line)
-        const newLine = addLines(lineId, newOpacity, position)
-        if(newOpacity >= 0.5 )
-        {
-            const clone = Object.assign({}, growingLines[lineId]);
             delete growingLines[lineId];
-            ungrowingLines[lineId] = clone;
-        }
-        else
-        {
-            growingLines[lineId] = {object : newLine, opacity:newOpacity};
+            ungrowingLines[lineId] = line;
         }
     }
     else
@@ -263,23 +249,12 @@ function growAndUngrowLines(lineId, growing = true )
             console.log("ungrowingLines[lineId] not found : ", lineId);
             return;
         }
-        const line = ungrowingLines[lineId].object;
-        const newOpacity = parseFloat( ungrowingLines[lineId].opacity) - 0.001;
-        if(lineId == 5)
-        {
-            // console.log("ungrowing");
-            // console.log("newOpacity", newOpacity);
-        }
-        const position = line.geometry.attributes.position;
-        scene.remove(line)
-        const newLine = addLines(lineId, newOpacity, position)
-        if(newOpacity <= 0.08)
+        const line = ungrowingLines[lineId];
+        const newOpacity =( parseFloat( line.material.opacity) - 0.001);
+        line.material.opacity = newOpacity.toString()
+        if(newOpacity <= 0.01)
         {
            delete ungrowingLines[lineId]
-        }
-        else
-        {
-            ungrowingLines[lineId] = {object : newLine, opacity:newOpacity};
         }
     }
 }
@@ -305,13 +280,7 @@ function animate()
         // Be executed 1 time per second
         if(previousTime != Math.floor(time))
         {
-            // const randomIntLine = Math.floor(Math.random()*countLines);
-            // const randomIntLine = 5;
-            // const randLine = lines_array[randomIntLine];
-            // if(typeof growingLines[randomIntLine] == "undefined" && typeof ungrowingLines[randomIntLine] == "undefined")
-            // {
-            //     growingLines[randomIntLine] = {object : randLine, opacity:0.08};
-            // }
+           
             previousTime = Math.floor(time)
         }
 
@@ -330,15 +299,22 @@ function animate()
         {
             growAndUngrowSphere(sphereId, false)
         }
+
         // Lines appearing and disappearing
-        // for(let lineId in growingLines)
-        // {
-        //     growAndUngrowLines(lineId, true)
-        // }
-        // for(let lineId in ungrowingLines)
-        // {
-        //     growAndUngrowLines(lineId, false)
-        // }
+        const randomIntLine = Math.floor(Math.random()*countLines);
+        const randLine = lines_array[randomIntLine];
+        if(typeof growingLines[randomIntLine] == "undefined" && typeof ungrowingLines[randomIntLine] == "undefined")
+        {
+            growingLines[randomIntLine] = randLine;
+        }
+        for(let lineId in growingLines)
+        {
+            growAndUngrowLines(lineId, true)
+        }
+        for(let lineId in ungrowingLines)
+        {
+            growAndUngrowLines(lineId, false)
+        }
        
         //Rotating boxes
         for(let box of Object.values(boxes_array))
