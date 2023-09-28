@@ -66,6 +66,8 @@ function addBoxes(index) {
     const material = new THREE.MeshBasicMaterial({ color: 0x000000, wireframe:true, transparent:true, opacity:  Math.abs(opacity)*5  });
     const box = new THREE.Mesh(geometry, material);
     box.position.set(x, y, z);
+    if(Math.random() >= 0.5)
+        box.rotation.x = 0.5
     boxes_array[index] = box;
     group.add(box);
 }
@@ -126,28 +128,39 @@ fontLoader.load( `${baseUrl}/helvetiker_regular.typeface.json`, function ( respo
 // Lines
 const countLines = 100;
 const lines_array = {};
-function addLines(index)
+function addLines(index, opacity = 0.08, position = null)
 {
-    const points = [];
-    for(let i = 0; i < 2 ; i++)
+    // console.log("addLines opacity : ", opacity);
+    let geometry;
+    if(position == null)
     {
-        const [x, y, z] = Array(3)
-        .fill()
-        .map(() => THREE.MathUtils.randFloatSpread(distance));
-        points.push( new THREE.Vector3( x, y, z ) );
+        const points = [];
+        for(let i = 0; i < 2 ; i++)
+        {
+            const [x, y, z] = Array(3)
+            .fill()
+            .map(() => THREE.MathUtils.randFloatSpread(distance));
+            points.push( new THREE.Vector3( x, y, z ) );
+        }
+        geometry = new THREE.BufferGeometry().setFromPoints( points );
     }
-   
-    const geometry = new THREE.BufferGeometry().setFromPoints( points );
+    else
+    {
+        geometry = new THREE.BufferGeometry().setAttribute('position', position)
+    }
     // geometry.setAttribute('position', new Float32BufferAttribute(points, 3))
+    let color = (index == 5 ? 0x00f00f : 0x7a7a7a )
     const material = new LineBasicMaterial({
-        color: 0x7a7a7a,
-        opacity: 0.08,
+        color: color,
+        opacity: opacity.toFixed(2),
         transparent:true,
         // depthWrite:false
     })
     const line = new Line(geometry, material)
+    // console.log("line", line);
     lines_array[index] = line;
     scene.add(line);
+    return line;
 }
 for(let i = 0; i < countLines; i++)
 {
@@ -187,28 +200,6 @@ window.addEventListener('touchmove', e => {
     }
 })
 let previousTime =  Math.floor(clock.getElapsedTime());
-function growAndUngrowLines(lineId, growing = true )
-{
-    if(growing == true)
-    {
-        const line = growingLines[lineId];
-        line.opacity = parseFloat( line.opacity) + 0.01
-        if(line.opacity >= 3 )
-        {
-            delete growingLines[lineId];
-            ungrowingLines[lineId] = line;
-        }
-    }
-    else
-    {
-        const line = ungrowingLines[lineId];
-        line.opacity -= 0.01
-        if(line.scale.x < 1)
-        {
-           delete ungrowingLines[lineId]
-        }
-    }
-}
 function growAndUngrowSphere(sphereId, growing = true )
 {
     if(growing == true)
@@ -235,6 +226,63 @@ function growAndUngrowSphere(sphereId, growing = true )
         }
     }
 }
+function growAndUngrowLines(lineId, growing = true )
+{
+    if(growing == true)
+    {
+        if(typeof growingLines[lineId] == "undefined")
+        {
+            console.log("growingLines[lineId] not found : ", lineId);
+            return;
+        }
+        const line = growingLines[lineId].object;
+        const position = line.geometry.attributes.position;
+        const newOpacity = parseFloat( growingLines[lineId].opacity) + 0.001
+        if(lineId == 5)
+        {
+            // console.log("growing");
+            // console.log("newOpacity", newOpacity);
+        }
+        scene.remove(line)
+        const newLine = addLines(lineId, newOpacity, position)
+        if(newOpacity >= 0.5 )
+        {
+            const clone = Object.assign({}, growingLines[lineId]);
+            delete growingLines[lineId];
+            ungrowingLines[lineId] = clone;
+        }
+        else
+        {
+            growingLines[lineId] = {object : newLine, opacity:newOpacity};
+        }
+    }
+    else
+    {
+        if(typeof ungrowingLines[lineId] == "undefined")
+        {
+            console.log("ungrowingLines[lineId] not found : ", lineId);
+            return;
+        }
+        const line = ungrowingLines[lineId].object;
+        const newOpacity = parseFloat( ungrowingLines[lineId].opacity) - 0.001;
+        if(lineId == 5)
+        {
+            // console.log("ungrowing");
+            // console.log("newOpacity", newOpacity);
+        }
+        const position = line.geometry.attributes.position;
+        scene.remove(line)
+        const newLine = addLines(lineId, newOpacity, position)
+        if(newOpacity <= 0.08)
+        {
+           delete ungrowingLines[lineId]
+        }
+        else
+        {
+            ungrowingLines[lineId] = {object : newLine, opacity:newOpacity};
+        }
+    }
+}
 const growingSpheres = {};
 const ungrowingSpheres = {};
 const growingLines = {};
@@ -257,22 +305,12 @@ function animate()
         // Be executed 1 time per second
         if(previousTime != Math.floor(time))
         {
-            // Lines appearing and disappearing
-            const randomIntLine = Math.floor(Math.random()*countLines);
-            const randLine = lines_array[randomIntLine];
-            scene.remove(randLine)
-            addLines(randomIntLine)
+            // const randomIntLine = Math.floor(Math.random()*countLines);
+            // const randomIntLine = 5;
+            // const randLine = lines_array[randomIntLine];
             // if(typeof growingLines[randomIntLine] == "undefined" && typeof ungrowingLines[randomIntLine] == "undefined")
             // {
-            //     growingLines[randomIntLine] = randLine;
-            // }
-            // for(let lineId in growingLines)
-            // {
-            //     growAndUngrowLines(lineId, true)
-            // }
-            // for(let lineId in ungrowingLines)
-            // {
-            //     growAndUngrowLines(lineId, false)
+            //     growingLines[randomIntLine] = {object : randLine, opacity:0.08};
             // }
             previousTime = Math.floor(time)
         }
@@ -291,6 +329,21 @@ function animate()
         for(let sphereId in ungrowingSpheres)
         {
             growAndUngrowSphere(sphereId, false)
+        }
+        // Lines appearing and disappearing
+        // for(let lineId in growingLines)
+        // {
+        //     growAndUngrowLines(lineId, true)
+        // }
+        // for(let lineId in ungrowingLines)
+        // {
+        //     growAndUngrowLines(lineId, false)
+        // }
+       
+        //Rotating boxes
+        for(let box of Object.values(boxes_array))
+        {
+            box.rotation.y += 0.01
         }
     }
 
